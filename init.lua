@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -163,6 +163,17 @@ vim.opt.confirm = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+
+--  [Nvim Tree] File Explorer
+vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = '[E]xplorer Toggle' })
+
+--  [Bufferline]
+---- Buffers Keymap
+vim.keymap.set('n', '<S-l>', ':BufferLineCycleNext<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<S-h>', ':BufferLineCyclePrev<CR>', { desc = 'Previous buffer' })
+---- Tabs Keymap
+--vim.keymap.set('n', '<S-l>', ':tabnext<CR>')
+--vim.keymap.set('n', '<S-h>', ':tabprevious<CR>')
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -240,13 +251,68 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
   --
   -- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
-  --
+
+  { -- Table for nvim-tree [File Explorer]
+    'nvim-tree/nvim-tree.lua', --link
+    dependencies = {
+      'nvim-tree/nvim-web-devicons', --file icons
+    },
+    config = function()
+      require('nvim-tree').setup {
+        on_attach = function(bufnr)
+          local api = require 'nvim-tree.api'
+
+          local function opts(desc)
+            return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+          end
+
+          -- Default mappings (you can add more from the docs)
+          api.config.mappings.default_on_attach(bufnr)
+        end,
+      }
+    end,
+  },
+  { -- Table for bufferline [Tabs]
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('bufferline').setup {
+        options = {
+          mode = 'buffers', -- "tabs" for workspaces, "buffers" for individual files
+          diagnostics = 'nvim_lsp',
+          offsets = {
+            {
+              filetype = 'NvimTree',
+              text = 'File Explorer',
+              highlight = 'Directory',
+              text_align = 'left',
+              separator = true,
+            },
+          },
+        },
+      }
+    end,
+  },
+  { -- Table for Render Markdown
+    'MeanderingProgrammer/markdown.nvim',
+    name = 'render-markdown',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    ft = 'markdown',
+    config = function()
+      require('render-markdown').setup {}
+    end,
+  },
 
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
@@ -690,6 +756,7 @@ require('lazy').setup({
             },
           },
         },
+        zls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -708,6 +775,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'zls',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -936,7 +1004,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'zig' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
