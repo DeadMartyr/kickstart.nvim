@@ -225,6 +225,17 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Ensure formatting isn't screwy on Typescript
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'typescript',
+  callback = function()
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -313,7 +324,28 @@ require('lazy').setup({
       require('render-markdown').setup {}
     end,
   },
-
+  { -- Table for Plenary
+    'nvim-lua/plenary.nvim',
+  },
+  { -- Table for typescriptt server (replacement for typescript-language-server
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {
+      -- Add this option to disable format on save
+      settings = {
+        typescript = {
+          format = {
+            enable = false, -- Disable formatting
+          },
+        },
+        javascript = {
+          format = {
+            enable = false, -- Disable formatting
+          },
+        },
+      },
+    },
+  },
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
   --    {
@@ -757,6 +789,7 @@ require('lazy').setup({
           },
         },
         zls = {},
+        -- tsserver = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -776,6 +809,7 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
         'zls',
+        --'typescript-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
