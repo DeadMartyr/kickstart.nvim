@@ -327,24 +327,9 @@ require('lazy').setup({
   { -- Table for Plenary
     'nvim-lua/plenary.nvim',
   },
-  { -- Table for typescriptt server (replacement for typescript-language-server
-    'pmizio/typescript-tools.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
-    opts = {
-      -- Add this option to disable format on save
-      settings = {
-        typescript = {
-          format = {
-            enable = false, -- Disable formatting
-          },
-        },
-        javascript = {
-          format = {
-            enable = false, -- Disable formatting
-          },
-        },
-      },
-    },
+  { -- Typescript Language server
+    'yioneko/nvim-vtsls',
+    dependencies = { 'neovim/nvim-lspconfig' },
   },
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
