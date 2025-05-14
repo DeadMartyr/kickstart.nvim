@@ -331,6 +331,15 @@ require('lazy').setup({
     'yioneko/nvim-vtsls',
     dependencies = { 'neovim/nvim-lspconfig' },
   },
+  {
+    'lervag/vimtex',
+    lazy = false,
+    init = function()
+      vim.g.vimtex_view_method = 'zathura'
+      vim.g.vimtex_compiler_method = 'latexmk'
+      vim.g.vimtex_mappings_enabled = 1
+    end,
+  },
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
   --    {
