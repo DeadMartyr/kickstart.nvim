@@ -165,8 +165,7 @@ vim.opt.confirm = true
 --  See `:help vim.keymap.set()`
 
 --  [Nvim Tree] File Explorer
-vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = '[E]xplorer Toggle' })
-
+vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = '[E]xplorer Toggle (Neo-tree)' })
 --  [Bufferline]
 ---- Buffers Keymap
 vim.keymap.set('n', '<S-l>', ':BufferLineCycleNext<CR>', { desc = 'Next buffer' })
@@ -268,25 +267,77 @@ require('lazy').setup({
   --
   -- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
 
-  { -- Table for nvim-tree [File Explorer]
-    'nvim-tree/nvim-tree.lua', --link
-    dependencies = {
-      'nvim-tree/nvim-web-devicons', --file icons
+  { -- Table for 3rd/Image [Image Rendering]
+    '3rd/image.nvim',
+    opts = {
+      backend = 'kitty',
+      processor = 'magick_cli', -- or "magick_rock"
+      integrations = {
+        markdown = {
+          enabled = true,
+          clear_in_insert_mode = false,
+          download_remote_images = true,
+          only_render_image_at_cursor = false,
+          only_render_image_at_cursor_mode = 'popup',
+          floating_windows = false, -- if true, images will be rendered in floating markdown windows
+          filetypes = { 'markdown', 'vimwiki' }, -- markdown extensions (ie. quarto) can go here
+        },
+        neorg = {
+          enabled = true,
+          filetypes = { 'norg' },
+        },
+        typst = {
+          enabled = true,
+          filetypes = { 'typst' },
+        },
+        html = {
+          enabled = false,
+        },
+        css = {
+          enabled = false,
+        },
+      },
+      max_width = nil,
+      max_height = nil,
+      max_width_window_percentage = nil,
+      max_height_window_percentage = 50,
+      window_overlap_clear_enabled = false, -- toggles images when windows are overlapped
+      window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', 'snacks_notif', 'scrollview', 'scrollview_sign' },
+      editor_only_render_when_focused = false, -- auto show/hide images when the editor gains/looses focus
+      tmux_show_only_in_active_window = false, -- auto show/hide images in the correct Tmux window (needs visual-activity off)
+      hijack_file_patterns = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.avif' }, -- render image files as images when opened
     },
-    config = function()
-      require('nvim-tree').setup {
-        on_attach = function(bufnr)
-          local api = require 'nvim-tree.api'
-
-          local function opts(desc)
-            return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-          end
-
-          -- Default mappings (you can add more from the docs)
-          api.config.mappings.default_on_attach(bufnr)
-        end,
-      }
-    end,
+  },
+  { -- Table for Neo-tree [File Explorer]
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons',
+      'MunifTanjim/nui.nvim',
+      { '3rd/image.nvim', opts = {} },
+    },
+    lazy = false, -- lazily loads itself
+    ---@module "neo-tree"
+    ---@type neotree.Config?
+    opts = {
+      window = {
+        mappings = {
+          ['P'] = {
+            'toggle_preview',
+            config = {
+              --use_float = false,
+              use_image_nvim = true,
+              -- title = 'Neo-tree Preview',
+            },
+          },
+        },
+      },
+      filesystem = {
+        follow_current_file = { enabled = true },
+        use_libuv_file_watcher = true,
+      },
+    },
   },
   { -- Table for bufferline [Tabs]
     'akinsho/bufferline.nvim',
@@ -331,7 +382,7 @@ require('lazy').setup({
     'yioneko/nvim-vtsls',
     dependencies = { 'neovim/nvim-lspconfig' },
   },
-  {
+  { -- LaTeX Compiler
     'lervag/vimtex',
     lazy = false,
     init = function()
