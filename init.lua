@@ -235,6 +235,17 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+-- Java-specific indentation
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'java',
+  callback = function()
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -361,6 +372,38 @@ require('lazy').setup({
           },
         },
       }
+    end,
+  },
+  { --This is just to have java "projects"
+    'mfussenegger/nvim-jdtls',
+    ft = { 'java' },
+    config = function()
+      local jdtls = require 'jdtls'
+
+      -- Find root of Java project (contains pom.xml or build.gradle)
+      local root_markers = { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' }
+      local root_dir = require('jdtls.setup').find_root(root_markers)
+
+      if root_dir then
+        local workspace_dir = vim.fn.stdpath 'data' .. '/jdtls/' .. vim.fn.fnamemodify(root_dir, ':p:h:t')
+
+        local config = {
+          cmd = {
+            'jdtls', -- or provide full path to jdtls
+            '-data',
+            workspace_dir,
+          },
+          root_dir = root_dir,
+          settings = {
+            java = {},
+          },
+          init_options = {
+            bundles = {},
+          },
+        }
+
+        jdtls.start_or_attach(config)
+      end
     end,
   },
   { -- Table for Render Markdown
@@ -834,6 +877,11 @@ require('lazy').setup({
           },
         },
         zls = {},
+        jdtls = {},
+        solargraph = {},
+        texlab = {},
+        vtsls = {},
+        clangd = {},
         -- tsserver = {},
       }
 
@@ -905,6 +953,7 @@ require('lazy').setup({
           cpp = true,
           typescript = true,
           typescriptreact = true,
+          java = true,
           javascript = true,
           javascriptreact = true,
           zig = true,
@@ -1101,6 +1150,7 @@ require('lazy').setup({
       auto_install = true,
       highlight = {
         enable = true,
+        disable = { 'latex' },
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
