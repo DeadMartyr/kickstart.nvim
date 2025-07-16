@@ -413,9 +413,11 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter',
       'nvim-tree/nvim-web-devicons',
     },
-    ft = 'markdown',
+    event = 'VeryLazy', -- Ensures it loads on startup
     config = function()
-      require('render-markdown').setup {}
+      require('render-markdown').setup {
+        file_types = { 'zig', 'lua', 'markdown', 'typescript', 'javascript' },
+      }
     end,
   },
   { -- Table for Plenary
@@ -878,7 +880,6 @@ require('lazy').setup({
         },
         zls = {},
         jdtls = {},
-        solargraph = {},
         texlab = {},
         vtsls = {},
         clangd = {},
@@ -905,7 +906,6 @@ require('lazy').setup({
         'stylua', -- Lua Formatter
         'texlab', -- LaTeX
         'vtsls', -- Typescript
-        'solargraph', -- Ruby
         'clangd', -- C, C++
         'jdtls', -- Java
       })
